@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<script type="text/javascript" src="data.json"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style type="text/css">
+		.col-md-3{
+			max-height: 500px;
+			background: #00000063;
+			width: 95%;
+			border-radius: 5px;
+			overflow: hidden;
+		}
+		.col-md-9{
+			background: #00000063;
+			border-radius: 5px;
+			width: 100%;
+		}
+		#row1 .col-md-9 {
+			background: none;
+		}
+		.row {
+
+			display: grid;
+			grid-template-columns: 1fr 4fr ;
+		}
+		#cx {
+
+			display: grid;
+			grid-template-columns: repeat(6, 1fr);
+			text-align: center;
+			padding-top: 5px;
+		}
+		body{
+			height: 100%; 
+
+			/* Center and scale the image nicely */
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+		#row2{
+			min-height: 100px;
+		}
+		#row1{
+			margin-bottom: 15px;
+			min-height: 500px;
+			max-height: 500px;
+		}
+		.container{
+			max-height: 760px;
+			min-width: 760px
+		}
+		.sl{
+			margin: 0 15%;
+		}
+		.scmt{
+			padding: 7px;
+			border-bottom: 1px solid white;
+		}
+		#cmt{
+			margin: 5px 0px 0px 10px;
+			padding: 5px;
+		}
+		iframe{
+			border-radius:5px;
+		}
+	</style>
+	<title>CODE LIVESTREAM</title>
+</head>
+<body>
+	<div class="container">     
+		<div class="row" id="row1">
+			<div class="col-md-3" >
+				
+			</div>
+			<div class="col-md-9" >
+				
+			</div>
+		</div>
+		<div class="row" id="row2">
+			<div class="col-md-3" >
+				<div class="cmt" style="display: grid;grid-template-columns: 1fr 1fr ;" > 
+					<div class="cmt1"><input type="text" id="cmt" ></div>
+					<img src="./img/send.png" alt="" height="30px" style="cursor: pointer;margin: 5px 0 0 7px;" onclick="comment()">
+				</div>
+				<a href="./change.php" target="_blank"><button style="text-align: center; margin: 10px; cursor: pointer;">thay đổi</button></a>
+			</div>
+			<div class="col-md-9" >
+				<div id="cx">
+					<label>
+						<img src="./img/like.png" height="60px">
+						<div id="like" class="sl"></div>
+					</label>
+					<label>
+						<img src="./img/love.png" height="60px">
+						<div id="love" class="sl"></div>
+					</label>
+					<label>
+						<img src="./img/haha.png" height="60px">
+						<div id="haha" class="sl"></div>
+					</label>
+					<label>
+						<img src="./img/wow.png" height="60px"  >
+						<div id="wow" class="sl"></div>
+					</label>
+					<label>
+						<img src="./img/sad.png" height="60px" >
+						<div id="sad" class="sl"></div>
+					</label>
+					<label>
+						<img src="./img/angry.png" height="60px">
+						<div id="angry" class="sl"></div>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+
+		var token="";
+		var id="";
+		var link="";
+		var data = JSON.parse("./data.json");
+		console.log(data);
+		link=data[0].link;
+		token=data[0].token;
+		id=data[0].id;
+		bg=data[0].bg;
+		$("body").css('background-image','url("'+bg+'")');
+		$(" #row1 .col-md-9").empty().html('<iframe width="98%" height="98%"src="https://www.youtube.com/embed/'+link+'"></iframe>');
+		getlive(token,id);
+		// $.ajax({
+		// 	url:"./data.json",
+		// 	type:"GET",
+		// 	dataType:"JSON",
+		// 	success:(data)=>{
+		// 		link=data[0].link;
+		// 		token=data[0].token;
+		// 		id=data[0].id;
+		// 		bg=data[0].bg;
+		// 		$("body").css('background-image','url("'+bg+'")');
+		// 		$(" #row1 .col-md-9").empty().html('<iframe width="98%" height="98%"src="https://www.youtube.com/embed/'+link+'"></iframe>');
+		// 		getlive(token,id);
+
+		// 	}
+		// })
+		var id_f="";
+		function getlive(token,id){
+			setInterval(function(
+
+				){
+				$.ajax({
+					url:"https://graph.facebook.com/"+id+"/comments?limit=5000&access_token="+token,
+					type:"GET",
+					dataType:"JSON",
+					success:(data)=>{
+						
+						if(id_f!=data.data[data.data.length-1].id){
+							$("#row1 .col-md-3").empty().html("");
+							for(var i=data.data.length-1;i>0;i--){
+
+								var name=data.data[i].from.name;
+								var comment=data.data[i].message;
+								$("#row1 .col-md-3").append('<div class="scmt"><strong style="color:red">'+name+': </strong><p style="display: contents;color: white; font-size:14pt">'+comment+'</p></div>');
+							}
+						}
+						id_f=data.data[data.data.length-1].id;
+					}
+				})
+				$.ajax({
+					url:"https://graph.facebook.com/"+id+"?fields=reactions.type(LIKE).limit(0).summary(1).as(like),reactions.type(LOVE).limit(0).summary(1).as(love),reactions.type(HAHA).limit(0).summary(1).as(haha),reactions.type(WOW).limit(0).summary(1).as(wow),reactions.type(SAD).limit(0).summary(1).as(sad),reactions.type(ANGRY).limit(0).summary(1).as(angry)&limit=10&access_token="+token,
+					type:"GET",
+					dataType:"JSON",
+					success:(data)=>{
+						var like=data.like.summary.total_count;
+						var love=data.love.summary.total_count;
+						var haha=data.haha.summary.total_count;
+						var wow=data.wow.summary.total_count;
+						var sad=data.sad.summary.total_count;
+						var angry=data.angry.summary.total_count;
+						$("#like").empty().html('<strong style="color: #71ff71;">'+like+'</strong>');
+						$("#love").empty().html('<strong style="color: #71ff71;">'+love+'</strong>');
+						$("#haha").empty().html('<strong style="color: #71ff71;">'+haha+'</strong>');
+						$("#wow").empty().html('<strong style="color: #71ff71;">'+wow+'</strong>');
+						$("#sad").empty().html('<strong style="color: #71ff71;">'+sad+'</strong>');
+						$("#angry").empty().html('<strong style="color: #71ff71;">'+angry+'</strong>');
+					}
+				})}, 3000);
+
+		}
+		function comment(){
+			var mess=$("#cmt").val();
+			$.ajax({
+				url:"https://graph.facebook.com/"+id+"/comments?message="+mess+"&method=POST&access_token="+token,
+				success:(data)=>{
+					$(".cmt1").empty().html('<input type="text" id="cmt" >');
+				}
+				
+			})
+		}
+	</script>
+</body>
+</html>
